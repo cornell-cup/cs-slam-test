@@ -24,16 +24,17 @@ sbm = cv2.StereoSGBM_create(
 
 # init windows
 cv2.namedWindow("left")
+cv2.namedWindow("right")
 cv2.namedWindow("disp")
 
 # init camera capture
 # left
-cap1 = cv2.VideoCapture(0)
+cap1 = cv2.VideoCapture(1)
 cap1.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
 cap1.set(cv2.CAP_PROP_FRAME_HEIGHT, 420)
 cap1.set(cv2.CAP_PROP_FPS, 30)
 # right
-cap2 = cv2.VideoCapture(1)
+cap2 = cv2.VideoCapture(0)
 cap2.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
 cap2.set(cv2.CAP_PROP_FRAME_HEIGHT, 420)
 cap2.set(cv2.CAP_PROP_FPS, 30)
@@ -55,6 +56,7 @@ while(True):
 
     # Display the resulting frame
     cv2.imshow('left',img_left)
+    cv2.imshow('right',img_left)
 
     compute_disp_and_show(img_left, img_right)
 
