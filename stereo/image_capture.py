@@ -27,15 +27,15 @@ while(True):
 
     # Display the resulting frame
     cv2.imshow('left',img_left)
-    cv2.imshow('right',img_left)
+    cv2.imshow('right',img_right)
 
     key = cv2.waitKey(1) & 0xFF
 
     if key == ord('q'):
         break
     elif key == ord('p'):
-        cv2.imwrite('images/img_left_'+picNum+'.png',img_left)
-        cv2.imwrite('images/img_right_'+picNum+'.png',img_right)
+        cv2.imwrite('images/img_left_'+str(picNum)+'.png',img_left)
+        cv2.imwrite('images/img_right_'+str(picNum)+'.png',img_right)
         picNum+=1
 
 # When everything done, release the capture
