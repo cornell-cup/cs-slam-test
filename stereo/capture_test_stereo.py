@@ -29,8 +29,14 @@ cv2.namedWindow("disp")
 # init camera capture
 # left
 cap1 = cv2.VideoCapture(0)
+cap1.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+cap1.set(cv2.CAP_PROP_FRAME_HEIGHT, 420)
+cap1.set(cv2.CAP_PROP_FPS, 30)
 # right
 cap2 = cv2.VideoCapture(1)
+cap2.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+cap2.set(cv2.CAP_PROP_FRAME_HEIGHT, 420)
+cap2.set(cv2.CAP_PROP_FPS, 30)
 
 def compute_disp_and_show(img_left, img_right):
     gray_left = cv2.cvtColor(img_left, cv2.COLOR_BGR2GRAY)
