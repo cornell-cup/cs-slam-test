@@ -23,14 +23,14 @@ def write_ply(fn, verts, colors):
 
 
 def load_camera_matrix():
-    left = np.load("configuration/cam_mats_left.npy")
-    right = np.load("configuration/cam_mats_right.npy")
+    left = np.load("calibration/cam_mats_left.npy")
+    right = np.load("calibration/cam_mats_right.npy")
 
     return left, right
 
 def load_distance_coeffs():
-    left = np.load("configuration/dist_coefs_left.npy")
-    right = np.load("configuration/dist_coefs_right.npy")
+    left = np.load("calibration/dist_coefs_left.npy")
+    right = np.load("calibration/dist_coefs_right.npy")
 
     return left, right
 
@@ -93,21 +93,29 @@ def loop():
     cv2.namedWindow("undistorted_right")
 
     while True:
+
+        '''_, img_left = vc_1.read()
+        _, img_right = vc_2.read()
+
+        cv2.imwrite("left_capture.jpg", img_left)
+        cv2.imwrite("right_capture.jpg", img_right)'''
+
+
         img_left = cv2.imread("left_capture.jpg")
         img_right = cv2.imread("right_capture.jpg")
 
         left_camera_matrix, right_camera_matrix         = load_camera_matrix()
         left_camera_dist_coefs, right_camera_dist_coefs = load_distance_coeffs()
 
-        left_camera_matrix[0][0] = left_camera_matrix[0][0]*1.5
-        left_camera_matrix[0][2] = left_camera_matrix[0][2]*1.5
-        left_camera_matrix[1][1] = left_camera_matrix[1][1]*1.125
-        left_camera_matrix[1][2] = left_camera_matrix[1][2]*1.125
+        '''left_camera_matrix[0][0] = left_camera_matrix[0][0]
+        left_camera_matrix[0][2] = left_camera_matrix[0][2]
+        left_camera_matrix[1][1] = left_camera_matrix[1][1]
+        left_camera_matrix[1][2] = left_camera_matrix[1][2]
 
-        right_camera_matrix[0][0] = right_camera_matrix[0][0]*1.5
-        right_camera_matrix[0][2] = right_camera_matrix[0][2]*1.5
-        right_camera_matrix[1][1] = right_camera_matrix[1][1]*1.125
-        right_camera_matrix[1][2] = right_camera_matrix[1][2]*1.125
+        right_camera_matrix[0][0] = right_camera_matrix[0][0]
+        right_camera_matrix[0][2] = right_camera_matrix[0][2]
+        right_camera_matrix[1][1] = right_camera_matrix[1][1]
+        right_camera_matrix[1][2] = right_camera_matrix[1][2]'''
 
         img_left_undistorted = cv2.undistort(img_left,   left_camera_matrix,  left_camera_dist_coefs)
         img_right_undistorted = cv2.undistort(img_right, right_camera_matrix, right_camera_dist_coefs)
