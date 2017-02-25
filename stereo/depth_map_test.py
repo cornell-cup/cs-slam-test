@@ -122,7 +122,10 @@ def loop():
         img_left_undistorted = cv2.undistort(img_left,   left_camera_matrix,  left_camera_dist_coefs)
         img_right_undistorted = cv2.undistort(img_right, right_camera_matrix, right_camera_dist_coefs)
 
+        cv2.imwrite("test_left.jpg",img_left_undistorted)
+        cv2.imwrite("test_right.jpg",img_right_undistorted)
 
+        break
         '''print "left dist: " + str(left_camera_dist_coefs)
         print "right dist:" + str(right_camera_dist_coefs)
 
