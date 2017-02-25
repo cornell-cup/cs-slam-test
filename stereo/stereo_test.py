@@ -28,7 +28,7 @@ def loop():
     while True:
         
         ret1, img1 = vc1.read();
-        '''
+    
         ret2, img2 = vc2.read();
         
         key = cv2.waitKey(1)
@@ -42,10 +42,7 @@ def loop():
         #if img2 is not None:
             #cv2.imshow("camera2", img2)
             #video_write2.write(img2)
-        '''
-        print(time.time() - cur_time)
-        cur_time = time.time()
-
+        
     vc1.release()
     vc2.release()
     video_write1.release()
