@@ -54,8 +54,8 @@ def get_depth(img_1, img_2):
     p2 = 4 * p1
 
     stereo = cv2.StereoSGBM_create(
-        minDisparity = -21,
-        numDisparities = 96,
+        minDisparity = 25,
+        numDisparities = 64,
         blockSize = 9,
         P1 = p1,
         P2 = p2,
@@ -70,7 +70,7 @@ def get_depth(img_1, img_2):
     disparity_visual = np.zeros(disparity.shape, dtype = "uint8")
     cv2.normalize(disparity, disparity_visual, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U)
 
-    '''h, w = img_1.shape[:2]
+    h, w = img_1.shape[:2]
     f = 0.8*w                          # guess for focal length
     Q = np.float32([[1, 0, 0, -0.5*w],
                     [0,-1, 0,  0.5*h], # turn points 180 deg around x-axis,
@@ -78,13 +78,13 @@ def get_depth(img_1, img_2):
                     [0, 0, 1,      0]])
 
     points = cv2.reprojectImageTo3D(disparity, Q)
-    colors = cv2.cvtColor(img_1, cv2.COLOR_BGR2RGB)
+    colors = cv2.cvtColor(img_1, cv2.COLOR_GRAY2RGB)
     mask = disparity > disparity.min()
     out_points = points[mask]
     out_colors = colors[mask]
     out_fn = 'out.ply'
-    #write_ply('out.ply', out_points, out_colors)
-    #print('%s saved' % 'out.ply')'''
+    write_ply('out.ply', out_points, out_colors)
+    print('%s saved' % 'out.ply')
 
     return disparity_visual
 
@@ -113,37 +113,22 @@ def loop():
         _, img_right = vc_1.read()
         _, img_left = vc_2.read()
 
-        #img_left = cv2.imread("left_capture.jpg")
-        #img_right = cv2.imread("right_capture.jpg")
-
         left_camera_matrix, right_camera_matrix         = load_camera_matrix()
         left_camera_dist_coefs, right_camera_dist_coefs = load_distance_coeffs()
 
         img_left_undistorted = cv2.undistort(img_left,   left_camera_matrix,  left_camera_dist_coefs)
         img_right_undistorted = cv2.undistort(img_right, right_camera_matrix, right_camera_dist_coefs)
 
-        cv2.imwrite("test_left.jpg",img_left_undistorted)
-        cv2.imwrite("test_right.jpg",img_right_undistorted)
-
-        break
-        '''print "left dist: " + str(left_camera_dist_coefs)
-        print "right dist:" + str(right_camera_dist_coefs)
-
-        print "left mat: " + str(left_camera_matrix)
-        print "right mat: " + str(right_camera_matrix)
-        
-        break'''
         key = cv2.waitKey(1)
         if key == 27:
             break
 
         if img_left is not None and img_right is not None:
             depth_image = get_depth(img_left_undistorted,img_right_undistorted)
+            break
             if depth_image is not None:
                 cv2.imshow("depth", depth_image)
 
-            cv2.imshow("left", img_left)
-            cv2.imshow("right", img_right)
             cv2.imshow("undistorted_left",img_left_undistorted)
             cv2.imshow("undistorted_right",img_right_undistorted)
 
