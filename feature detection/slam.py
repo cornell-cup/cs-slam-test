@@ -15,6 +15,8 @@ calib_right_dist = numpy.array(
     [[ 0.25088046, -1.03260309,  0.        ,  0.        ,  1.41224436]])
 
 
+max_features = 10
+
 def slam(lf, rf):
     stereo = cv2.StereoSGBM_create(minDisparity = 16,
         numDisparities = 96,
@@ -35,6 +37,22 @@ def slam(lf, rf):
     lkp, ldesc = detector.detectAndCompute(luf, None)
     rkp, rdesc = detector.detectAndCompute(ruf, None)
 
+    if len(lkp) > max_features:
+        kpde = list(zip(lkp, ldesc))
+        lkpde = sorted(kpde, key=lambda kd: kd[0].response, reverse=True)
+        lkpde = lkpde[:max_features]
+        lkp, ldesc = list(zip(*lkpde))
+        lkp = list(lkp)
+        ldesc = numpy.asarray(ldesc)
+
+    if len(rkp) > max_features:
+        kpde = list(zip(rkp, rdesc))
+        rkpde = sorted(kpde, key=lambda kd: kd[0].response, reverse=True)
+        rkpde = rkpde[:max_features]
+        rkp, rdesc = list(zip(*rkpde))
+        rkp = list(rkp)
+        rdesc = numpy.asarray(rdesc)
+    
     bf = cv2.BFMatcher()
     matches = bf.knnMatch(ldesc,rdesc, k=2)
 
