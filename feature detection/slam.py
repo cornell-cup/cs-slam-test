@@ -27,7 +27,7 @@ max_features = 50
 
 point_3d_string = ""
 total_position = 0
-asdfasdfasdf
+
 DELTA_Z_THRESHOLD = 3
 
 debug_file = open("debug.txt", 'w')
