@@ -23,14 +23,14 @@ def write_ply(fn, verts, colors):
 
 
 def load_camera_matrix():
-    left = np.load("configuration/cam_mats_left.npy")
-    right = np.load("configuration/cam_mats_right.npy")
+    left = np.load("calibration/cam_mats_left.npy")
+    right = np.load("calibration/cam_mats_right.npy")
 
     return left, right
 
 def load_distance_coeffs():
-    left = np.load("configuration/dist_coefs_left.npy")
-    right = np.load("configuration/dist_coefs_right.npy")
+    left = np.load("calibration/dist_coefs_left.npy")
+    right = np.load("calibration/dist_coefs_right.npy")
 
     return left, right
 
@@ -45,17 +45,30 @@ def get_depth(img_1, img_2):
         A np array containing 16 bit fixed point values representing a disparty map
     """
 
-    stereo = cv2.StereoSGBM_create(minDisparity = 16,
-        numDisparities = 96,
-        blockSize = 16,
-        P1 = 8*3*3*2,
-        P2 = 32*3*3*2,
-        disp12MaxDiff = 1,
-        uniquenessRatio = 10,
-        speckleWindowSize = 100,
-        speckleRange = 32)
+    img_1 = cv2.cvtColor(img_1, cv2.COLOR_BGR2GRAY)
+    img_2 = cv2.cvtColor(img_2, cv2.COLOR_BGR2GRAY)
 
-    disparity = stereo.compute(img_2, img_1).astype(np.float32) / 16.0
+
+    SADWindowSize = 20
+    p1 = 8 * 1 * SADWindowSize * SADWindowSize
+    p2 = 4 * p1
+
+    stereo = cv2.StereoSGBM_create(
+        minDisparity = 25,
+        numDisparities = 64,
+        blockSize = 9,
+        P1 = p1,
+        P2 = p2,
+        disp12MaxDiff = 1,
+        preFilterCap = 63,
+        uniquenessRatio = 7,
+        speckleWindowSize = 50,
+        speckleRange = 1)
+
+    disparity = stereo.compute(img_1, img_2)
+
+    disparity_visual = np.zeros(disparity.shape, dtype = "uint8")
+    cv2.normalize(disparity, disparity_visual, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U)
 
     h, w = img_1.shape[:2]
     f = 0.8*w                          # guess for focal length
@@ -65,15 +78,15 @@ def get_depth(img_1, img_2):
                     [0, 0, 1,      0]])
 
     points = cv2.reprojectImageTo3D(disparity, Q)
-    colors = cv2.cvtColor(img_1, cv2.COLOR_BGR2RGB)
+    colors = cv2.cvtColor(img_1, cv2.COLOR_GRAY2RGB)
     mask = disparity > disparity.min()
     out_points = points[mask]
     out_colors = colors[mask]
     out_fn = 'out.ply'
-    #write_ply('out.ply', out_points, out_colors)
-    #print('%s saved' % 'out.ply')
+    write_ply('out.ply', out_points, out_colors)
+    print('%s saved' % 'out.ply')
 
-    return disparity
+    return disparity_visual
 
 def loop():
     vc_1 = cv2.VideoCapture(0)
@@ -82,10 +95,13 @@ def loop():
     vc_1.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
     vc_1.set(cv2.CAP_PROP_FRAME_HEIGHT, 420)
     vc_1.set(cv2.CAP_PROP_FPS, 30)
+    vc_1.set(cv2.CAP_PROP_AUTOFOCUS, 0)
 
     vc_2.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
     vc_2.set(cv2.CAP_PROP_FRAME_HEIGHT, 420)
     vc_2.set(cv2.CAP_PROP_FPS, 30)
+    vc_2.set(cv2.CAP_PROP_AUTOFOCUS, 0)
+
 
     cv2.namedWindow("left")
     cv2.namedWindow("right")
@@ -93,37 +109,26 @@ def loop():
     cv2.namedWindow("undistorted_right")
 
     while True:
-        img_left = cv2.imread("left_capture.jpg")
-        img_right = cv2.imread("right_capture.jpg")
+
+        _, img_right = vc_1.read()
+        _, img_left = vc_2.read()
 
         left_camera_matrix, right_camera_matrix         = load_camera_matrix()
         left_camera_dist_coefs, right_camera_dist_coefs = load_distance_coeffs()
 
-        left_camera_matrix[0][0] = left_camera_matrix[0][0]*1.5
-        left_camera_matrix[0][2] = left_camera_matrix[0][2]*1.5
-        left_camera_matrix[1][1] = left_camera_matrix[1][1]*1.125
-        left_camera_matrix[1][2] = left_camera_matrix[1][2]*1.125
-
-        right_camera_matrix[0][0] = right_camera_matrix[0][0]*1.5
-        right_camera_matrix[0][2] = right_camera_matrix[0][2]*1.5
-        right_camera_matrix[1][1] = right_camera_matrix[1][1]*1.125
-        right_camera_matrix[1][2] = right_camera_matrix[1][2]*1.125
-
         img_left_undistorted = cv2.undistort(img_left,   left_camera_matrix,  left_camera_dist_coefs)
         img_right_undistorted = cv2.undistort(img_right, right_camera_matrix, right_camera_dist_coefs)
-        
+
         key = cv2.waitKey(1)
         if key == 27:
             break
 
         if img_left is not None and img_right is not None:
-            depth_image = None
-            #depth_image = get_depth(img_left,img_right)
+            depth_image = get_depth(img_left_undistorted,img_right_undistorted)
+            break
             if depth_image is not None:
-                cv2.imshow("depth", (depth_image-16)/96)
+                cv2.imshow("depth", depth_image)
 
-            cv2.imshow("left", img_left)
-            cv2.imshow("right", img_right)
             cv2.imshow("undistorted_left",img_left_undistorted)
             cv2.imshow("undistorted_right",img_right_undistorted)
 
