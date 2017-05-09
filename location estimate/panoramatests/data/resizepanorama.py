@@ -3,7 +3,7 @@ import numpy as np
 
 # resize the files to 25% of its original size
 
-indices = np.arange(3,6)
+indices = np.arange(1,13)
 
 for i in indices:
     name = 'region%d.jpg' % (i)

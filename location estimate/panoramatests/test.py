@@ -37,8 +37,8 @@ for name,img in zip(datanames,data):
                 kp2 += [k]
                 ds2 += [d]
         print('%s has %d keypoints after masking\n' % (name, len(kp2)))
-        imgkp = cv2.drawKeypoints(img, kp2, None, flags=2)
-        cv2.imwrite('test%smaskkp.png' % (name), imgkp)
+        #imgkp = cv2.drawKeypoints(img, kp2, None, flags=2)
+        #cv2.imwrite('test%smaskkp.png' % (name), imgkp)
         datakp += [kp2]
         datades += [np.asarray(ds2)]
     else:
@@ -49,7 +49,7 @@ test = 1
 if len(sys.argv) > 1:
     test = int(sys.argv[1])
     
-testind = np.arange(1,4) #1-13
+testind = np.arange(5,13) #1-13
 #testind = np.asarray([10, 13])
 testimgs = []
 testkps = []
